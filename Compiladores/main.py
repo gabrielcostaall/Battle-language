@@ -12,7 +12,7 @@ def run(command):
     print(result)
 
 command = 0
-print("/nLuta iniciada! Caso queira instruções, digite HELP!")
+print("\nLuta iniciada! Caso queira instruções, digite HELP!")
 
 while command != 1:
     print("\nDigite seu comando (Se quiser parar, digite 1): ")

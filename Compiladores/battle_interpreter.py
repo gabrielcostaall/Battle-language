@@ -89,7 +89,7 @@ class BattleInterpreter:
             "mana": mana
         }
 
-        print (f"Ataque '{nome}' aprendido (dano={dano}, mana={mana})")
+        print (f"\nAtaque '{nome}' aprendido (dano={dano}, mana={mana})")
         self._bot_turn()
 
     def _atacar(self, ataque_nome, parte):
@@ -100,7 +100,7 @@ class BattleInterpreter:
         attacks = self.state.attacks
 
         if ataque_nome not in attacks:
-            raise Exception(f"Ataque '{ataque_nome}' não existe")
+            raise Exception(f"\nAtaque '{ataque_nome}' não existe")
 
         ataque = attacks[ataque_nome]
         jogador = self.state.player
@@ -108,7 +108,7 @@ class BattleInterpreter:
 
         # checa mana
         if jogador.mana < ataque["mana"]:
-            print("Mana insuficiente!")
+            print("\nMana insuficiente!")
             return
 
         # aplica ataque
@@ -116,7 +116,7 @@ class BattleInterpreter:
         bot.vida -= ataque["dano"]
 
         print(
-            f"{jogador.nome} atacou o {bot.nome} "
+            f"\n{jogador.nome} atacou o {bot.nome} "
             f"na {parte} com {ataque_nome} "
             f"(dano={ataque['dano']})"
         )
@@ -124,7 +124,7 @@ class BattleInterpreter:
         self._status()
 
         if not bot.esta_vivo():
-            print("O BOT MORREU! VOCÊ VENCEU!")
+            print("\nO BOT MORREU! VOCÊ VENCEU!")
             self.state.game_over = True
             return
 
@@ -132,7 +132,7 @@ class BattleInterpreter:
 
 
     def _defender(self, defense_type):
-        print(f"Defesa ativada: {defense_type.upper()}") 
+        print(f"\nDefesa ativada: {defense_type.upper()}") 
         self._bot_turn()
     
 
@@ -169,21 +169,21 @@ class BattleInterpreter:
         jogador.vida -= dano
 
         print(
-            f"🤖 Bot atacou com {ataque_nome} "
+            f"\n Bot atacou com {ataque_nome} "
             f"(dano={dano})"
         )
 
         self._status()
 
         if not jogador.esta_vivo():
-            print("💀 VOCÊ MORREU!")
+            print("VOCÊ MORREU!")
             self.state.game_over = True
 
 
             self._status()
 
             if not jogador.esta_vivo():
-                print("💀 VOCÊ MORREU! GAME OVER.")
+                print("VOCÊ MORREU! GAME OVER.")
                 self.state.game_over = True
 
     def _status(self):
@@ -211,7 +211,7 @@ class BattleInterpreter:
         defesa = DEFESAS[defesa_nome]
 
         if jogador.mana < defesa["mana"]:
-            print("Mana insuficiente para defender")
+            print("\nMana insuficiente para defender")
             return
 
         jogador.mana -= defesa["mana"]
@@ -221,7 +221,7 @@ class BattleInterpreter:
             jogador.vida += defesa["valor"]
             if jogador.vida > 100:
                 jogador.vida = 100
-            print(f"{jogador.nome} usou Cura (+{defesa['valor']} HP)")
+            print(f"\n{jogador.nome} usou Cura (+{defesa['valor']} HP)")
             self._status()
             self._bot_turn()
             return
@@ -232,7 +232,7 @@ class BattleInterpreter:
             defesa["valor"]
         )
 
-        print(f"{jogador.nome} ativou defesa: {defesa_nome}")
+        print(f"\n{jogador.nome} ativou defesa: {defesa_nome}")
         self._bot_turn()
 
     def _help(self, data):
