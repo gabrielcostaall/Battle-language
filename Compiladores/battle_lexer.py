@@ -3,7 +3,7 @@ from sly import Lexer
 class BattleLexer(Lexer):
 
     tokens = {
-        CONVOCAR, ATACAR, DEFENDER,
+        CONVOCAR, ATACAR, DEFENDER, HELP,
         GUERREIRO, ARQUEIRO, MAGO,
         CURA, ESCUDO, ESQUIVAR,
         BARRIGA, CABECA, PERNA,
@@ -19,6 +19,7 @@ class BattleLexer(Lexer):
     ATACAR   = r'ATACAR'
     DEFENDER = r'DEFENDER'
     APRENDER = r'APRENDER'
+    HELP = r'HELP'
 
     # Entidades
     GUERREIRO = r'Guerreiro'

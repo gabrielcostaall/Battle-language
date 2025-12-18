@@ -60,6 +60,8 @@ class BattleInterpreter:
         elif command == "DEFENDER":
             return self._defender(ast[1])
 
+        elif command == "HELP":
+            return self._help(ast[0])
         else:
             raise Exception(f"Comando desconhecido: {command}")
 
@@ -232,4 +234,36 @@ class BattleInterpreter:
 
         print(f"{jogador.nome} ativou defesa: {defesa_nome}")
         self._bot_turn()
+
+    def _help(self, data):
+        help_text = """
+        Comandos disponíveis:
+
+        1. CONVOCAR [personagem]:
+           - Convoca um personagem para a batalha.
+           - Exemplo: CONVOCAR Guerreiro
+
+        2. APRENDER [nome_ataque] [dano] [mana]:
+           - Aprende um novo ataque, fornecendo o nome, dano e mana.
+           - Exemplo: APRENDER soco 10 0
+
+        3. ATACAR [nome_ataque] NA [parte_do_corpo]:
+           - Realiza um ataque usando um ataque previamente aprendido.
+           - Exemplo: ATACAR fogo NA Barriga
+
+        4. DEFENDER [nome_defesa]:
+           - Usa uma defesa. A defesa pode ser uma ação como 'Cura'.
+           - Exemplo: DEFENDER Cura
+
+        5. HELP:
+           - Exibe esta ajuda com os comandos disponíveis e suas explicações.
+
+        Ataques disponíveis:
+        """
+        for idx, (name, attack) in enumerate(self.state.attacks.items(), 1):
+            help_text += f"T: Ataque {idx}: {name.capitalize()} - Dano: {attack['dano']}, Mana: {attack['mana']}\n"
+
+        help_text += "\nExemplo de uso: ATACAR [nome_ataque]"
+
+        return help_text
 

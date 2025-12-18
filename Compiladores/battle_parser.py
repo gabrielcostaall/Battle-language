@@ -27,6 +27,10 @@ class BattleParser(Parser):
     @_('ATACAR IDENT NA body_part')
     def command(self, p):
         return ("ATACAR", p.IDENT, p.body_part)
+    
+    @_('HELP')
+    def command(self, p):
+        return ('HELP', "")
 
     # Entidades
     @_('GUERREIRO')
