@@ -1,3 +1,22 @@
+import random
+
+class Character:
+    def __init__(self, nome, vida=100, mana=100):
+        self.nome = nome
+        self.vida = vida
+        self.mana = mana
+        self.defesa_ativa = None
+
+    def esta_vivo(self):
+        return self.vida > 0
+    
+class DefenseState:
+    def __init__(self, tipo, valor):
+        self.tipo = tipo      # 'escudo', 'desviar', 'cura'
+        self.valor = valor    # % redução, chance, cura
+
+
+
 class GameState:
     def __init__(self):
         self.attacks = {
@@ -15,7 +34,10 @@ class GameState:
             }
         }
 
-        self.character = None
+        self.player = Character("Jogador")
+        self.bot = Character("Bot")
+
+        self.game_over = False
 
     
 class BattleInterpreter:
@@ -56,26 +78,158 @@ class BattleInterpreter:
 
         if not nome or dano is None or mana is None:
             raise Exception("Ataque inválido: nome_ataque, dano e mana são obrigatórios")
+        
+        if nome in self.state.attacks:
+         raise Exception("Ataque já existe")
 
         self.state.attacks[nome] = {
             "dano": dano,
             "mana": mana
         }
 
-        return f"Ataque '{nome}' aprendido (dano={dano}, mana={mana})"
+        print (f"Ataque '{nome}' aprendido (dano={dano}, mana={mana})")
+        self._bot_turn()
 
-    def _atacar(self, attack_name, body_part):
-        if attack_name not in self.state.attacks:
-            raise Exception(f"Ataque '{attack_name}' não foi aprendido")
+    def _atacar(self, ataque_nome, parte):
+        if self.state.game_over:
+            print("O jogo acabou.")
+            return
 
-        attack = self.state.attacks[attack_name]
+        attacks = self.state.attacks
 
-        return (
-            f"Ataque {attack_name.upper()} atingiu a {body_part}!\n"
-            f"Dano: {attack['dano']} | 🔮 Mana gasta: {attack['mana']}"
+        if ataque_nome not in attacks:
+            raise Exception(f"Ataque '{ataque_nome}' não existe")
+
+        ataque = attacks[ataque_nome]
+        jogador = self.state.player
+        bot = self.state.bot
+
+        # checa mana
+        if jogador.mana < ataque["mana"]:
+            print("Mana insuficiente!")
+            return
+
+        # aplica ataque
+        jogador.mana -= ataque["mana"]
+        bot.vida -= ataque["dano"]
+
+        print(
+            f"{jogador.nome} atacou o {bot.nome} "
+            f"na {parte} com {ataque_nome} "
+            f"(dano={ataque['dano']})"
         )
 
+        self._status()
+
+        if not bot.esta_vivo():
+            print("O BOT MORREU! VOCÊ VENCEU!")
+            self.state.game_over = True
+            return
+
+        self._bot_turn()
+
+
     def _defender(self, defense_type):
-        return f"Defesa ativada: {defense_type.upper()}"
+        print(f"Defesa ativada: {defense_type.upper()}") 
+        self._bot_turn()
     
-    
+
+    def _bot_turn(self):
+
+        bot = self.state.bot
+        jogador = self.state.player
+
+        ataque_nome, ataque = random.choice(list(self.state.attacks.items()))
+
+        if bot.mana < ataque["mana"]:
+            print("Bot tentou atacar, mas sem mana")
+            return
+
+        bot.mana -= ataque["mana"]
+
+        dano = ataque["dano"]
+
+        
+        defesa = jogador.defesa_ativa
+
+        if defesa:
+            if defesa.tipo == "escudo":
+                dano = int(dano * (1 - defesa.valor))
+                print("🛡️ Escudo reduziu o dano!")
+
+            elif defesa.tipo == "desviar":
+                if random.random() < defesa.valor:
+                    dano = 0
+                    print("💨 Ataque desviado!")
+
+            jogador.defesa_ativa = None  # defesa consumida
+
+        jogador.vida -= dano
+
+        print(
+            f"🤖 Bot atacou com {ataque_nome} "
+            f"(dano={dano})"
+        )
+
+        self._status()
+
+        if not jogador.esta_vivo():
+            print("💀 VOCÊ MORREU!")
+            self.state.game_over = True
+
+
+            self._status()
+
+            if not jogador.esta_vivo():
+                print("💀 VOCÊ MORREU! GAME OVER.")
+                self.state.game_over = True
+
+    def _status(self):
+        p = self.state.player
+        b = self.state.bot
+
+        print(
+            f"STATUS → "
+            f"Jogador: HP={p.vida}, Mana={p.mana} | "
+            f"Bot: HP={b.vida}, Mana={b.mana}"
+        )
+
+
+    def _defender(self, defesa_nome):
+        DEFESAS = {
+        "escudo": {"tipo": "escudo", "valor": 0.5, "mana": 20},
+        "desviar": {"tipo": "desviar", "valor": 0.3, "mana": 15},
+        "cura": {"tipo": "cura", "valor": 25, "mana": 20},
+        }
+        jogador = self.state.player
+
+        if defesa_nome not in DEFESAS:
+            raise Exception("Defesa desconhecida")
+
+        defesa = DEFESAS[defesa_nome]
+
+        if jogador.mana < defesa["mana"]:
+            print("Mana insuficiente para defender")
+            return
+
+        jogador.mana -= defesa["mana"]
+
+        # cura é imediata
+        if defesa["tipo"] == "cura":
+            jogador.vida += defesa["valor"]
+            if jogador.vida > 100:
+                jogador.vida = 100
+            print(f"{jogador.nome} usou Cura (+{defesa['valor']} HP)")
+            self._status()
+            self._bot_turn()
+            return
+
+        # escudo ou desviar
+        jogador.defesa_ativa = DefenseState(
+            defesa["tipo"],
+            defesa["valor"]
+        )
+
+        print(f"{jogador.nome} ativou defesa: {defesa_nome}")
+        self._bot_turn()
+

@@ -11,9 +11,17 @@ def run(command):
     result = interpreter.execute(ast)
     print(result)
 
-print("Digite seu comando: ")
-command = input()
-run (command)
+command = 0
+
+while command != 1:
+    print("\nDigite seu comando (Se quiser parar, digite 1): ")
+    command = input()
+    if command!="1":
+        run (command)
+    else:
+        print("\n Luta finalizada!")
+
+
 
 # run ("CONVOCAR Guerreiro")
 # run ('APRENDER (nome_ataque: "tiro", dano: 30, mana: 50)')
